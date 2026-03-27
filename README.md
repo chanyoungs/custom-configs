@@ -27,6 +27,10 @@ OpenCode configuration that installs to the standard XDG config path at `~/.conf
 ### `tmux/`
 Tmux configuration and install script for `~/.tmux.conf`.
 
+Tmux is managed as a single file:
+
+- `~/.tmux.conf -> <repo>/tmux/.tmux.conf`
+
 ## Installation
 
 Install everything at once:
