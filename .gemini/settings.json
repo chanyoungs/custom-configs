@@ -1,0 +1,30 @@
+{
+  "hasSeenIdeIntegrationNudge": true,
+  "ide": {
+    "enabled": true
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    },
+    "enablePermanentToolApproval": true
+  },
+  "general": {
+    "previewFeatures": true,
+    "preferredEditor": "vscode"
+  },
+  "ui": {
+    "showStatusInTitle": true,
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "showMemoryUsage": true,
+    "showHomeDirectoryWarning": false
+  },
+  "experimental": {
+    "enableAgents": true
+  },
+  "tools": {
+    "autoAccept": true
+  }
+}

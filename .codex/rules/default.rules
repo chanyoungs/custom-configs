@@ -1,0 +1,2 @@
+prefix_rule(pattern=["command", "-v", "codex"], decision="allow")
+prefix_rule(pattern=["codex", "--version"], decision="allow")

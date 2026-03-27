@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "oh-my-openagent@3.14.0"
+  ],
+  "provider": {
+    "openai": {
+      "name": "OpenAI",
+      "models": {
+        "gpt-5.2": {
+          "name": "GPT-5.2"
+        }
+      }
+    }
+  }
+}
