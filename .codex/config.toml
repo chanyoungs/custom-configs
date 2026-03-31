@@ -12,3 +12,6 @@ hide_full_access_warning = true
 
 [projects."/data/home/chanyoungs"]
 trust_level = "trusted"
+
+[projects."/home/chanyoungs"]
+trust_level = "trusted"

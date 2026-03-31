@@ -1,0 +1,4 @@
+interface:
+  display_name: "Supervision"
+  short_description: "Set up recurring Codex-based task supervision"
+  default_prompt: "Use $supervision to set up hourly Codex supervision for this task list"
