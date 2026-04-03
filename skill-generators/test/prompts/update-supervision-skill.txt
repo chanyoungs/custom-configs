@@ -1,0 +1,32 @@
+You are improving the supervision skill based on the latest failed iteration of the recurring operations workspace.
+
+Read these in order:
+
+1. `iterations/CURRENT/report.json`
+2. `iterations/CURRENT/evaluation.md`
+3. `iterations/CURRENT/required-updates.md`
+4. `iterations/CURRENT/instructions.final.md`
+5. `iterations/CURRENT/supervisor.log`
+6. `iterations/CURRENT/skill.before.md`
+7. `/home/chanyoungs/custom-configs/.codex/skills/supervision/SKILL.md`
+
+Your task:
+
+- Fix only the supervision skill or the recurring prompt/wrapper guidance that should be generalized into the skill.
+- Do not change the synthetic workload to make the iteration pass.
+- Keep the skill focused on persistent supervision through cron.
+- Incorporate improvements needed for:
+  - launch verification
+  - evidence-based completion
+  - silent-failure detection
+  - narrow safe fixes
+  - blocked external input escalation
+  - avoiding edits outside runtime scope when the workspace uses a runtime-copy model
+
+Constraints:
+
+- Edit only `/home/chanyoungs/custom-configs/.codex/skills/supervision/SKILL.md`.
+- Do not edit files under `/home/chanyoungs/custom-configs/skill-generators/test-external-deps`.
+- Do not change the current iteration snapshot.
+
+After editing, stop.

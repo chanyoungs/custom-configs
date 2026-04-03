@@ -25,6 +25,7 @@ Generate a Codex skill that sets up unattended recurring supervision for a concr
 - invoke `codex exec` non-interactively from cron so Codex reads the markdown, inspects progress, fixes issues when possible, and writes updates back
 - append all Codex terminal output into one aggregate live log file
 - skip the current schedule slot if the previous Codex supervision run is still active
+- support immediate supervisor re-entry on job failure or completion when the workflow needs tighter control than cron alone
 - remove its own cron entry when all declared tasks are complete
 
 ## Trigger Intent
@@ -46,6 +47,7 @@ When the skill is used, the generated skill should instruct Codex to create at m
 - one aggregate log file that receives stdout and stderr from every supervising Codex invocation
 - one lock file or equivalent overlap-prevention mechanism
 - one stable cron tag so the installed job can later be removed safely
+- optional helper scripts for supervised job launch and immediate supervisor triggering when the workflow includes long-running jobs
 
 Suggested names:
 
@@ -68,6 +70,7 @@ The generated skill should require the supervision markdown file to contain:
 - the last supervision timestamp
 - the next recommended action
 - explicit completion criteria for the whole batch
+- the intended human-readable log timezone when local operational time matters
 
 The skill should instruct Codex to normalize loose bullets from the user into a clearer checklist if needed, but not invent major task scope that the user did not ask for.
 
@@ -94,6 +97,9 @@ Preferred markdown sections:
 - `Open Issues`
 - `Completion Criteria`
 - `Run History`
+- `Next Agent Notes`
+
+The generated skill should prefer one canonical markdown file and explicitly direct recurring Codex runs to update that file rather than drifting to ad hoc notes.
 
 ## Codex CLI Requirements
 
@@ -120,11 +126,14 @@ If the local environment needs additional Codex flags, the generated skill may a
 The cron-executed wrapper script should:
 
 - set explicit `HOME`, `PATH`, and working directory
+- set an explicit `TZ` when the user wants logs in a specific timezone
 - acquire a non-blocking lock before starting Codex
 - exit successfully and log a skip message if the lock is already held
 - refresh or render a deterministic prompt for Codex
 - tell Codex to read the supervision markdown, verify progress, fix issues if possible, and update the markdown
 - append all stdout and stderr to the aggregate log
+- write wrapper start and end markers with timestamps
+- optionally enforce an early bootstrap acknowledgment in the markdown or log so hung Codex starts are detected quickly
 - check completion conditions after Codex exits
 - remove the cron job if all tasks are complete
 
@@ -151,6 +160,9 @@ Requirements:
 - skip events are appended to that file
 - wrapper lifecycle messages are appended to that file
 - timestamps are included for every wrapper-generated line
+- wrapper timestamps should honor the configured `TZ`
+
+If the supervised workflow dispatches long-running train, eval, import, or tmux jobs, the generated skill should prefer status files and tmux-dispatch logs so later runs can distinguish running, success, failure, and interruption.
 
 ## Prompt Template Requirements
 
@@ -164,6 +176,13 @@ The prompt should instruct Codex to:
 4. fix issues that are safe and clearly within scope
 5. update the markdown with status changes, evidence, blockers, and a brief run note
 6. stop creating new work once all tasks are complete
+
+For long-running jobs, the prompt should also instruct Codex to:
+
+7. avoid dispatching overlapping jobs
+8. treat status files, tmux panes, and result artifacts as first-class evidence
+9. decide explicitly whether a failed job should resume or restart from clean artifacts, and record that decision
+10. update `Next Agent Notes` with the concrete next step for the following supervising run
 
 The generated skill should explicitly tell Codex not to let the recurring prompt drift over time. It should be rendered from a stable template with only the minimum runtime substitutions such as file paths, cadence, or working directory.
 
@@ -201,6 +220,8 @@ For the prompt example "hourly supervise", the generated skill should install an
 
 If the user gives only a natural-language cadence, the skill should normalize it to a cron schedule and record both the human phrase and the cron form in the supervision markdown.
 
+Cron cadence should be treated as the baseline safety net, not necessarily the only re-entry path. If job launchers can detect completion or failure immediately, the generated skill should allow helper scripts to trigger `run-supervisor.sh` right away instead of waiting for the next cron slot.
+
 ## Safety Rules
 
 The generated skill should instruct Codex to:
@@ -211,6 +232,8 @@ The generated skill should instruct Codex to:
 - avoid expanding the task list beyond the user's intent
 - avoid destructive fixes unless the user or existing instructions clearly permit them
 - record unresolved blockers instead of looping blindly
+- avoid silently converting an interrupted run into a clean restart without recording whether checkpoints were preserved, resumed, or discarded
+- avoid writing timestamps in an implicit timezone when the user expects a specific local timezone
 
 If the requested task list is too ambiguous to supervise safely, the skill should still create the markdown skeleton and record the ambiguity rather than inventing hidden assumptions.
 
@@ -224,7 +247,8 @@ The generated skill should teach Codex to follow this workflow:
 4. Install a tagged cron entry for the cadence.
 5. On each run, execute `codex exec`, read the markdown, inspect progress, attempt in-scope fixes, and update the markdown.
 6. Skip the run if the previous Codex process is still active.
-7. Remove the tagged cron entry when all completion criteria are satisfied.
+7. If job launchers can detect completion or failure immediately, optionally trigger supervisor re-entry right away.
+8. Remove the tagged cron entry when all completion criteria are satisfied.
 
 ## Instruction To The Consuming Agent
 
