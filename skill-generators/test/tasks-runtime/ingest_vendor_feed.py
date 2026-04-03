@@ -19,7 +19,7 @@ def main() -> int:
         sys.executable,
         str(runner),
         "--input",
-        str(FIXTURES_DIR / "inputs" / "source-data.txt"),
+        str(FIXTURES_DIR / "inputs" / "source_data.txt"),
         "--output",
         str(TASK_OUTPUT_DIR / "output.ok"),
         "--copy-output",

@@ -13,11 +13,12 @@ EXTERNAL_DEPS_DIR = Path(os.environ["EXTERNAL_DEPS_DIR"])
 
 
 def main() -> int:
+    print("JOB_BEGIN bootstrap_catalog_sync", flush=True)
     runner = EXTERNAL_DEPS_DIR / "bootstrap_catalog_runner.py"
     cmd = [
         sys.executable,
         str(runner),
-        "--workspace-path",
+        "--workspace",
         str(ROOT_DIR),
         "--output",
         str(TASK_OUTPUT_DIR / "output.ok"),
@@ -25,7 +26,6 @@ def main() -> int:
     completed = subprocess.run(cmd)
     if completed.returncode != 0:
         return completed.returncode
-    print("JOB_BEGIN bootstrap_catalog_sync", flush=True)
     print("JOB_COMPLETE bootstrap_catalog_sync", flush=True)
     return 0
 

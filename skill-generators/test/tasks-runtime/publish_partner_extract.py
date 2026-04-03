@@ -21,7 +21,7 @@ def main() -> int:
         "--source",
         str(FIXTURES_DIR / "inputs" / "source_data.txt"),
         "--output",
-        str(TASK_OUTPUT_DIR / "result.tmp"),
+        str(TASK_OUTPUT_DIR / "partner_extract.txt"),
     ]
     completed = subprocess.run(cmd)
     if completed.returncode != 0:

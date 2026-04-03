@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT_DIR.parents[1]
 STATE_DIR = ROOT_DIR / "state" / "jobs"
 LOG_DIR = ROOT_DIR / "logs" / "jobs"
 SUPERVISOR_LOG = ROOT_DIR / "logs" / "supervisor.log"
@@ -47,12 +48,7 @@ def load_status(job_id: str) -> dict[str, str]:
 
 
 def git_changed_paths() -> list[str]:
-    result = subprocess.run(
-        ["git", "-C", str(ROOT_DIR), "status", "--porcelain"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    result = subprocess.run(["git", "-C", str(REPO_ROOT), "status", "--porcelain"], check=True, capture_output=True, text=True)
     paths: list[str] = []
     for line in result.stdout.splitlines():
         if not line:
@@ -60,7 +56,7 @@ def git_changed_paths() -> list[str]:
         rel = line[3:]
         if " -> " in rel:
             rel = rel.split(" -> ", 1)[1]
-        paths.append(str((ROOT_DIR / rel).resolve()))
+        paths.append(str((REPO_ROOT / rel).resolve()))
     return paths
 
 
@@ -85,6 +81,8 @@ def collect_supervisor_actions() -> list[str]:
         return []
     actions: list[str] = []
     for line in SUPERVISOR_LOG.read_text(encoding="utf-8", errors="replace").splitlines():
+        if len(line) < 20 or line[4] != "-" or line[7] != "-" or line[10] != "T":
+            continue
         if "supervisor-start" in line or "supervisor-end" in line or "skipped:" in line or "harness-complete" in line:
             actions.append(line)
     return actions
@@ -232,7 +230,25 @@ def write_updates(report: dict, path: Path) -> None:
 
 def main() -> int:
     args = parse_args()
-    report = build_report()
+    try:
+        report = build_report()
+    except Exception as exc:  # noqa: BLE001
+        report = {
+            "passed": False,
+            "jobs": {},
+            "supervisor_actions": collect_supervisor_actions(),
+            "findings": [
+                {
+                    "severity": "high",
+                    "code": "evaluator_internal_error",
+                    "job_id": "global",
+                    "message": f"{type(exc).__name__}: {exc}",
+                }
+            ],
+            "required_updates": [
+                "Fix the harness evaluator so it reliably emits iteration reports even when a run hits an unexpected edge case."
+            ],
+        }
     rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
 
     if args.report_out:

@@ -49,3 +49,15 @@
 /opencode/package.json
 /opencode/bun.lock
 /opencode/.gitignore
+
+# supervision harness runtime artifacts
+/skill-generators/test/.codex/
+/skill-generators/test/configs-runtime/
+/skill-generators/test/iterations/
+/skill-generators/test/logs/
+/skill-generators/test/state/
+/skill-generators/test/supervision/instructions.md
+/skill-generators/test/supervision/supervisor.lock
+/skill-generators/test/tasks-runtime/
+/skill-generators/test/**/__pycache__/
+/skill-generators/test-external-deps/__pycache__/

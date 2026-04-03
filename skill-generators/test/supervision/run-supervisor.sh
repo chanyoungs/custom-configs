@@ -22,11 +22,19 @@ printf '%s supervisor-start trigger=%s failed_task=%s\n' \
   "$(date -Is)" "${SUPERVISION_TRIGGER:-schedule}" "${FAILED_TASK_ID:-none}" >> "$LOG_FILE"
 
 if command -v codex >/dev/null 2>&1; then
-  codex exec \
-    --cd "$ROOT_DIR" \
-    --sandbox workspace-write \
-    --skip-git-repo-check \
-    - < "$PROMPT_FILE" >> "$LOG_FILE" 2>&1 || true
+  if [[ "${SUPERVISION_RUN_IN_TMUX_PANE:-0}" = "1" ]]; then
+    codex exec \
+      --cd "$ROOT_DIR" \
+      --sandbox workspace-write \
+      --skip-git-repo-check \
+      - < "$PROMPT_FILE" 2>&1 | tee -a "$LOG_FILE" || true
+  else
+    codex exec \
+      --cd "$ROOT_DIR" \
+      --sandbox workspace-write \
+      --skip-git-repo-check \
+      - < "$PROMPT_FILE" >> "$LOG_FILE" 2>&1 || true
+  fi
 else
   printf '%s codex-not-found; supervisor prompt not executed\n' "$(date -Is)" >> "$LOG_FILE"
 fi

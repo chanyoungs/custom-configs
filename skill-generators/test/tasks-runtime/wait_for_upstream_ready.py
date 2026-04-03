@@ -19,7 +19,7 @@ def main() -> int:
         sys.executable,
         str(runner),
         "--signal",
-        str(FIXTURES_DIR / "inputs" / "ready-singal"),
+        str(FIXTURES_DIR / "inputs" / "ready.signal"),
         "--output",
         str(TASK_OUTPUT_DIR / "output.ok"),
         "--attempts",

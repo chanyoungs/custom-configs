@@ -13,6 +13,7 @@ SUPERVISION_DIR="$ROOT_DIR/supervision"
 
 rm -rf "$TASKS_RUNTIME_DIR" "$CONFIGS_RUNTIME_DIR" "$ROOT_DIR/state" "$ROOT_DIR/logs"
 mkdir -p "$TASKS_RUNTIME_DIR" "$CONFIGS_RUNTIME_DIR" "$STATE_DIR" "$LOGS_DIR" "$ROOT_DIR/logs"
+rm -f "$ROOT_DIR/state/supervisor-pane-id"
 cp -R "$TASKS_SRC_DIR"/. "$TASKS_RUNTIME_DIR/"
 cp -R "$CONFIGS_SRC_DIR"/. "$CONFIGS_RUNTIME_DIR/"
 
