@@ -1,0 +1,17 @@
+Read `supervision/instructions.md` first and treat it as the source of truth.
+
+Then:
+
+1. Inspect `state/jobs/`, `logs/jobs/`, `tasks-runtime/`, `configs-runtime/`, and `fixtures/`.
+2. Verify that jobs actually began by checking for `JOB_BEGIN` in job logs.
+3. Classify each job using real evidence, not exit code alone.
+4. Prioritize `FAILED_TASK_ID` if present, but still inspect the full workspace state.
+5. Repair only files under `tasks-runtime/` and `configs-runtime/`.
+6. Never edit `tasks-src/`, `configs-src/`, or `/home/chanyoungs/custom-configs/skill-generators/test-external-deps`.
+7. The runtime wrappers call external dependency scripts. Diagnose wrapper mistakes from dependency error output and correct the runtime caller rather than changing the dependency.
+8. Allowed repair types are narrow local fixes such as wrong flag, wrong filename, wrong path, wrong config value, wrong output target, or wrong readiness marker.
+9. After a repair, rerun the affected job with `bin/run-task.sh <job-id> <runtime-script>`.
+10. Mark a job `done` only after the rerun produces passing evidence.
+11. If `import_customer_dataset` is blocked by a missing external file, do not fabricate the dataset. Record the exact missing path, mark it waiting for user input, and continue unrelated jobs if possible.
+12. Update `supervision/instructions.md` with evidence, run history, open issues, and next steps.
+13. Stop once the completion criteria in the markdown are satisfied.

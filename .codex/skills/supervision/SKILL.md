@@ -23,6 +23,7 @@ Create a small supervision workspace that includes:
 - one aggregate log file for all supervisor runs
 - one lock file or equivalent overlap guard
 - one tagged cron entry that can remove itself on completion
+- optional helper scripts for supervised job launch and immediate supervisor triggering when the workflow includes long-running jobs
 
 Suggested paths:
 
@@ -42,6 +43,7 @@ Before installing automation, extract or normalize:
 - the requested cadence such as hourly, daily, every 30 minutes, or an explicit cron expression
 - the project working directory
 - completion criteria for the full batch
+- the intended human-readable log timezone when local operational time matters
 
 If the user provided loose bullets, normalize them into stable task entries. Do not invent substantial new scope. If important details are ambiguous, record that ambiguity in the markdown file instead of silently assuming too much.
 
@@ -57,6 +59,7 @@ The file should include:
 - `Open Issues`
 - `Completion Criteria`
 - `Run History`
+- `Next Agent Notes`
 
 Each task should have:
 
@@ -95,11 +98,14 @@ Create a wrapper script that cron can execute.
 The wrapper must:
 
 - set explicit `HOME`, `PATH`, and working directory
+- set an explicit `TZ` when the user wants logs in a specific timezone
 - ensure the log directory exists
 - acquire a non-blocking lock before starting Codex
 - append stdout and stderr from Codex to one aggregate log file
 - log a skip message if the previous run is still active
 - pass a deterministic prompt telling Codex to read the markdown, inspect progress, fix issues if possible, and update the markdown
+- write wrapper start and end markers with timestamps
+- optionally enforce an early bootstrap acknowledgment so hung Codex starts are detected quickly
 - check completion after Codex exits
 - remove only its own tagged cron entry when all completion criteria are met
 
@@ -125,8 +131,11 @@ Minimum requirements:
 - Codex stdout appends to the same file
 - Codex stderr appends to the same file
 - skipped overlapping runs append to the same file
+- wrapper timestamps honor the configured `TZ`
 
 Additional logs are optional, but not a replacement for the aggregate supervisor log.
+
+If the supervised workflow dispatches long-running train, eval, import, or tmux jobs, prefer status files and tmux-dispatch logs so later runs can distinguish running, success, failure, and interruption.
 
 ## Prompt File
 
@@ -141,6 +150,13 @@ The prompt should instruct Codex to:
 5. update the markdown with evidence, blockers, and a short timestamped run note
 6. stop once the full completion criteria are satisfied
 
+For long-running jobs, the prompt should also instruct Codex to:
+
+7. avoid dispatching overlapping jobs
+8. treat status files, tmux panes, and result artifacts as first-class evidence
+9. decide explicitly whether a failed job should resume or restart from clean artifacts, and record that decision
+10. update `Next Agent Notes` with the concrete next step for the following supervising run
+
 Do not let the recurring prompt drift into a different workflow over time.
 
 ## Cadence
@@ -153,6 +169,8 @@ Support at least:
 - explicit cron expressions
 
 If the user gives natural language such as "hourly", convert it to cron syntax and record both the human phrase and cron schedule in the markdown file.
+
+Treat cron as the baseline safety net, not necessarily the only re-entry path. If job launchers can detect completion or failure immediately, helper scripts may trigger `run-supervisor.sh` right away instead of waiting for the next cron slot.
 
 ## Cron Installation
 
@@ -195,3 +213,5 @@ When completion is detected:
 - Do not expand the task list beyond the user's intent.
 - Do not apply destructive fixes unless they are clearly authorized.
 - If the task list is too ambiguous, create the supervision workspace and record the ambiguity instead of faking precision.
+- Do not silently convert an interrupted run into a clean restart without recording whether checkpoints were preserved, resumed, or discarded.
+- Do not write timestamps in an implicit timezone when the user expects a specific local timezone.

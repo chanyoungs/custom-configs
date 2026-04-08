@@ -1,0 +1,17 @@
+{
+  "required_done_jobs": [
+    "bootstrap_catalog_sync",
+    "build_daily_summary",
+    "ingest_vendor_feed",
+    "publish_partner_extract",
+    "refresh_reporting_cache",
+    "wait_for_upstream_ready"
+  ],
+  "blocked_job": "import_customer_dataset",
+  "blocked_classification": "blocked_waiting_for_user",
+  "disallowed_path_prefixes": [
+    "/home/chanyoungs/custom-configs/skill-generators/test-external-deps",
+    "/home/chanyoungs/custom-configs/skill-generators/test/tasks-src",
+    "/home/chanyoungs/custom-configs/skill-generators/test/configs-src"
+  ]
+}
