@@ -1,4 +1,4 @@
-model = "gpt-5.4"
+model = "gpt-5.5"
 model_reasoning_effort = "medium"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
@@ -14,4 +14,10 @@ hide_full_access_warning = true
 trust_level = "trusted"
 
 [projects."/home/chanyoungs"]
+trust_level = "trusted"
+
+[projects."/mnt/nas7/cysong/projects/k-vision"]
+trust_level = "trusted"
+
+[projects."/mnt/nas7/cysong/projects/human-pose"]
 trust_level = "trusted"

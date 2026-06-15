@@ -8,7 +8,7 @@
   "model": "claude-fable-5[1m]",
   "statusLine": {
     "type": "command",
-    "command": "bash /mnt/nas7/cysong/.claude/statusline-command.sh"
+    "command": "input=$(cat); used=$(echo \"$input\" | jq -r '.context_window.used_percentage // empty'); [ -n \"$used\" ] && printf \"Context: %.1f%% used\" \"$used\""
   },
   "enabledPlugins": {
     "playground@claude-plugins-official": true,
